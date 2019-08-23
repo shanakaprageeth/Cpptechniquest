@@ -14,6 +14,14 @@ float add_numbers(float a, float b, float c = 0); //default argument
 int increase_number(int val = 1);
 // recursive function
 int factorial(int);
+inline int factorial_inline(int n){
+    if (n > 1){
+        return n*factorial(n-1);
+    }
+    else{
+        return 1;
+    }
+}
 
 int main(int argc, char *argv[]){
     int a = 0;
@@ -36,6 +44,9 @@ int main(int argc, char *argv[]){
     increase_number();
     increase_number();
     printf("!%d = %d\n",a,factorial(a));
+
+    printf("!%d = %d\n",4,factorial_inline(4));
+
     return 0;
 }
 
