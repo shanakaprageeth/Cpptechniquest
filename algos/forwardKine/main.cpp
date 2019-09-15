@@ -8,7 +8,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
+#define PI 3.14159265
 using namespace std;
 
 template <typename T>
@@ -231,15 +231,13 @@ public:
     }
 };
 
-
-
 int main(int argc, char *argv[]){
     Rotation_Z<double> A;
     Trans_Z<double> B;
     Trans_X<double> C;
     Rotation_X<double> D;
-    double thetaZ = 3.14/5.0;
-    double thetaX = 1.2;
+    double thetaZ = 90.0*PI/180.0;
+    double thetaX = 15.0*PI/180.0;
     double deltaZ =2.0;
     double deltaX = 1.02;
     A.setTheta(thetaZ);
