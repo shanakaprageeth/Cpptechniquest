@@ -1,7 +1,7 @@
 # the compiler
 CC=g++
 # options 
-CFLAGS=-std=c++11 -c 
+CFLAGS=-std=c++11 -c -fPIC 
 
 SOURCES=main.cpp shared_memory_support.cpp
 
@@ -9,7 +9,7 @@ FILE='coredump'
 
 OBJECTS=$(SOURCES:.cpp=.o)
 
-LDFLAGS=-L/usr/local/lib -lpthread 
+LDFLAGS=-L/usr/local/lib -lpthread -fPIC 
 
 EXECUTABLE=app
 
