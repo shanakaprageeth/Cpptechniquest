@@ -5,16 +5,12 @@ pipeline {
         stage('basics') {
             steps {
                 sh """
-                    cd basics
-                    find -type f \( -name 'GNUmakefile' -o -name 'makefile' -o -name 'Makefile' \) -exec bash -c 'cd "$(dirname "{}")" && make' \;
+                    ./build.sh
                 """
             }
-        stage('algos') {
+        stage('clean') {
             steps {
-                sh """
-                    cd basics
-                    find -type f \( -name 'GNUmakefile' -o -name 'makefile' -o -name 'Makefile' \) -exec bash -c 'cd "$(dirname "{}")" && make' \;
-                """
+                echo "nothing to do."
             }
         }        
     }
