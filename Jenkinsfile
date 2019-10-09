@@ -8,6 +8,7 @@ pipeline {
                     ./build.sh
                 """
             }
+        }
         stage('clean') {
             steps {
                 echo "nothing to do."
