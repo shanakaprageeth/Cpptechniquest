@@ -24,3 +24,7 @@ insmod:
 # target to remove kernel module from system
 rmmod:
 	sudo rmmod $(DRIVER_NAME)
+
+# target to create dummy device on userland
+add_device:
+	sudo mknod /dev/dummy_device c 99 0

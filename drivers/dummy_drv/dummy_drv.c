@@ -22,8 +22,8 @@ MODULE_VERSION(DRV_MODULE_VERSION);
  * @param struct file pointer to a file instance
  * @return int 0-success
  */
-static int user_device_open(struct *device_file, struct file *instance){
-	printk(KERN_NOTICE "Device /dev/file was opened\n")
+static int user_device_open(struct inode *device_file, struct file *instance){
+	printk(KERN_NOTICE "Device /dev/file was opened\n");
 	return 0;
 }
 
@@ -33,12 +33,12 @@ static int user_device_open(struct *device_file, struct file *instance){
  * @param struct file pointer to a file instance
  * @return int 0-success
  */
-static int user_device_release(struct *device_file, struct file *instance){
-	printk(KERN_NOTICE "Device /dev/file was closed\n")
+static int user_device_release(struct inode *device_file, struct file *instance){
+	printk(KERN_NOTICE "Device /dev/file was closed\n");
 	return 0;
 }
 
-/** 
+/**
  * @brief structure to save the file operations functions
  * @param owner owner of the operation
  * @param open open operation function
@@ -47,7 +47,7 @@ static int user_device_release(struct *device_file, struct file *instance){
 static struct file_operations file_ops = {
 	.owner = THIS_MODULE,
 	.open = user_device_open,
-	.release = user_device_release,
+	.release = user_device_release
 };
 
 /**
@@ -58,8 +58,12 @@ static int __init dummy_init(void){
 	printk("%s()\n", __func__);
 	printk(KERN_NOTICE "Loading " DRV_NAME " Driver \n");
 	// register the device to userland
-	// TODO 
-	return 0;
+    int retval = register_chrdev(99, "device_number",&file_ops );
+	if(retval < 0)
+			printk(KERN_NOTICE "failed to register the device \n");
+	else
+			printk(KERN_NOTICE "successufully registered device \n");
+	return retval;
 }
 
 /**
@@ -68,7 +72,8 @@ static int __init dummy_init(void){
 */
 static void __exit dummy_exit(void){
 	printk("%s()\n", __func__);
-	printk(KERN_NOTICE "Unloading " DRV_NAME " Driver \n");
+	unregister_chrdev(99, "device_number");
+			printk(KERN_NOTICE "Unloading " DRV_NAME " Driver \n");
 }
 
 /**
