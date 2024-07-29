@@ -1,13 +1,13 @@
-#if !defined(DUMMY_DRV_H)
-#define DUMMY_DRV_H
+#if !defined(CHAR_DEV_H)
+#define CHAR_DEV_H
 
 #define LICENSE_V "GPL"
-#define DRV_NAME "DUMMY_DRV"
+#define DRV_NAME "char_drv"
 #define DRV_MODULE_VERSION "1.0"
 #define DRV_MODULE_AUTHOR "Shanaka"
 #define DRV_MODULE_DESCRIPTION "Test driver with kernel messages"
 
-#define DEVICE_NAME "dummy_device"
+#define DEVICE_NAME "char_dev"
 #define DEVICE_CLASS "char_device"
 
 /* Userland device properties*/

@@ -6,7 +6,7 @@
 #include <linux/cdev.h>
 #include <linux/uaccess.h>
 
-#include "dummy_drv.h"
+#include "char_drv.h"
 
 MODULE_LICENSE(LICENSE_V);
 MODULE_AUTHOR(DRV_MODULE_AUTHOR);

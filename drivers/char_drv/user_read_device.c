@@ -5,7 +5,7 @@
 #include <string.h>
 
 int main(){
-    const char dev_path[] = "/dev/dummy_device";
+    const char dev_path[] = "/dev/char_dev";
     int user_dev = open(dev_path, O_RDONLY);
     if (user_dev == -1){
         printf("ERROR: Failed to open device- %s\n",dev_path);
