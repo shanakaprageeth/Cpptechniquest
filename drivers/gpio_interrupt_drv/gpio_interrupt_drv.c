@@ -5,10 +5,15 @@ MODULE_AUTHOR(DRV_MODULE_AUTHOR);
 MODULE_DESCRIPTION(DRV_MODULE_DESCRIPTION);
 MODULE_VERSION(DRV_MODULE_VERSION);
 
+static irqreturn_t interrupt_handler(int irq_no, void *dev_id){
+	printk(KERN_NOTICE "Interrupt received from : %d\n",irq_no);
+	return IRQ_HANDLED;
+}
+
 static ssize_t return_data_to_user(struct file *File, char *user_buffer, size_t count, loff_t *offset){
-	int to_copy, not_copied, delta;
+	int to_copy, not_copied, delta, i;
 	to_copy = min(count, sizeof(gpio_buffer));
-	for(int i=0; i<to_copy; i++)
+	for(i=0; i<to_copy; i++)
 		gpio_buffer[i] = gpio_get_value(gpios[i]);
 	not_copied = copy_to_user(user_buffer, gpio_buffer, to_copy);
 	delta = to_copy - not_copied;
@@ -17,11 +22,11 @@ static ssize_t return_data_to_user(struct file *File, char *user_buffer, size_t 
 }
 
 static ssize_t process_user_data(struct file *File, const char *user_buffer, size_t count, loff_t *offset){
-	int to_copy, not_copied, delta;
+	int to_copy, not_copied, delta, i;
 	to_copy = min(count, sizeof(gpio_buffer));
 	not_copied = copy_from_user(gpio_buffer, user_buffer, to_copy);
 	delta = to_copy - not_copied;
-	for(int i=0; i<to_copy; i++)
+	for(i=0; i<to_copy; i++)
 		gpio_set_value(gpios[i], ((gpio_buffer[i]) & (1<<i)) >> i);
 	printk(KERN_DEBUG "Processed user data \n");
 	return delta;
@@ -39,6 +44,7 @@ static int user_device_release(struct inode *device_file, struct file *instance)
 
 static int __init ModuleInit(void){
 	int retval = 0;
+	int i = 0;
 	printk("%s()\n", __func__);
 	printk(KERN_NOTICE "Loading " DRV_NAME " Driver \n");
 	// TODO make device node number dynamic
@@ -48,7 +54,10 @@ static int __init ModuleInit(void){
 		return -1;
 	}
 	printk(KERN_NOTICE "successufully registered device %d\n", device_no);
-	if ((device_class = class_create(DEVICE_CLASS)) == NULL){
+	// amd64
+	//if ((device_class = class_create(DEVICE_CLASS)) == NULL){
+	// arm64
+	if ((device_class = class_create(THIS_MODULE, DEVICE_CLASS)) == NULL){
 		printk(KERN_ALERT "failed to create device class %s\n",DEVICE_CLASS);
 		unregister_chrdev_region(device_no, 1);
 		return -1;
@@ -67,7 +76,7 @@ static int __init ModuleInit(void){
 		device_destroy(device_class, device_no);
 		return -1;
 	}
-    for(int i=0; i<sizeof(gpio_buffer); i++) {
+    for(i=0; i<sizeof(gpio_buffer); i++) {
 		if(gpio_request(gpios[i], gpio_names[i])) {
 			printk(KERN_ALERT "Error Init GPIO %d\n", gpios[i]);
 			for(;i>=0; i--){
@@ -79,12 +88,21 @@ static int __init ModuleInit(void){
 			return -1;
 		}
 	}
-	for(int i=0; i<sizeof(gpio_buffer); i++) {
-		if(gpio_direction_output(gpios[i], 0)) {
-			printk(KERN_ALERT "Error setting GPIO %d to output\n", i);
+	for(i=0; i<sizeof(gpio_buffer); i++) {
+		if(gpio_direction_input(gpios[i])) {
+			printk(KERN_ALERT "Error setting GPIO %d to input\n", i);
 			for(;i>=0; i--){
 				gpio_free(gpios[i]);
 			}
+			class_destroy(device_class);
+			unregister_chrdev_region(device_no, 1);
+			device_destroy(device_class, device_no);
+			return -1;
+		}
+		irq_numbers[i] = gpio_to_irq(gpios[i]);
+		if(request_irq(irq_numbers[i], interrupt_handler, IRQF_TRIGGER_RISING, "gpio_interrupt_request", NULL) != 0){
+			printk(KERN_ALERT "Error failed to register interrupt: %d\n", irq_numbers[i]);
+			gpio_free(gpios[i]);
 			class_destroy(device_class);
 			unregister_chrdev_region(device_no, 1);
 			device_destroy(device_class, device_no);
@@ -96,8 +114,11 @@ static int __init ModuleInit(void){
 
 static void __exit ModuleExit(void){
 	printk("%s()\n", __func__);
-	for(int i=0; i<sizeof(gpio_buffer); i++)
+	int i;
+	for(i=0; i<sizeof(gpio_buffer); i++){
+		free_irq(irq_numbers[i], NULL);
 		gpio_free(gpios[i]);
+	}	
 	cdev_del(&device_cdev);
 	class_destroy(device_class);
 	unregister_chrdev_region(device_no, 1);

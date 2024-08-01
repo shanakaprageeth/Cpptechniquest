@@ -28,10 +28,10 @@ static struct cdev device_cdev;
 /* GPIO char buffer */
 static char gpio_buffer[1];
 // GPIO numbers
-unsigned int gpios[] = {111};
+unsigned int gpios[] = {101};
 char *gpio_names[] = {"GPIO_110"};
-// interrupt number
-unsigned int irq_no;
+// interrupt number for gpio array
+unsigned int irq_numbers[] = {0};
 
 /**
  * @brief Handle interrupt routine

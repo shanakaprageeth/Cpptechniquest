@@ -45,7 +45,10 @@ static int __init ModuleInit(void){
 		return -1;
 	}
 	printk(KERN_NOTICE "successufully registered device %d\n", device_no);
-	if ((device_class = class_create(DEVICE_CLASS)) == NULL){
+	// amd64
+	//if ((device_class = class_create(DEVICE_CLASS)) == NULL){
+	// arm64
+	if ((device_class = class_create(THIS_MODULE, DEVICE_CLASS)) == NULL){
 		printk(KERN_ALERT "failed to create device class %s\n",DEVICE_CLASS);
 		unregister_chrdev_region(device_no, 1);
 		return -1;

@@ -5,8 +5,8 @@
 #include <string.h>
 
 int main(){
-    const char dev_path[] = "/dev/dummy_device";
-    int user_dev = open(dev_path, O_RDONLY);
+    const char dev_path[] = "/dev/gpio_dev";
+    int user_dev = open(dev_path, O_RDWR);
     if (user_dev == -1){
         printf("ERROR: Failed to open device- %s\n",dev_path);
         return -1;

@@ -3,7 +3,7 @@ DRIVER_NAME = gpio_interrupt_drv
 obj-m := $(DRIVER_NAME).o
 
 # all build target builds the modules
-all: module build_dev_reader
+all: module
 
 # custom build command to build module target to build kernel module
 module:
@@ -11,8 +11,7 @@ module:
 
 # clean kernel module build outputs
 clean:
-	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) clean
-	rm user_write_device
+	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) clear
 
 # build target all and verify the kernel module is loaded to the system or load it
 check: all
@@ -31,9 +30,6 @@ rmmod:
 #add_device:
 #	sudo mknod /dev/gpio_dev c 99 0
 
-# target to create dummy device on userland
-build_dev_reader:
-	gcc user_write_device.c -o user_write_device
 
 #target write/read the device
 rw_device:

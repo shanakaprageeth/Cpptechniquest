@@ -2,6 +2,7 @@
 #define GPIO_DEV_H
 
 #include <linux/module.h>
+#include <linux/device.h> 
 #include <linux/init.h>
 #include <linux/string.h>
 #include <linux/printk.h>
@@ -26,10 +27,10 @@ static struct class *device_class;
 static struct cdev device_cdev;
 
 /* GPIO char buffer */
-static char gpio_buffer[8];
+static char gpio_buffer[1];
 // GPIO numbers
-unsigned int gpios[] = {111,111,112,113,114,115,116,117};
-char *gpio_names[] = {"GPIO_110", "GPIO_111", "GPIO_112", "GPIO_113", "GPIO_114", "GPIO_115", "GPIO_116", "GPIO_117"};
+unsigned int gpios[] = {396};
+char *gpio_names[] = {"gpio-396"};
 
 /**
  * @brief Return kernel data back to user buffer

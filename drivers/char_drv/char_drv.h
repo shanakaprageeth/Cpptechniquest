@@ -2,6 +2,7 @@
 #define CHAR_DEV_H
 
 #include <linux/module.h>
+#include <linux/device.h> 
 #include <linux/init.h>
 #include <linux/string.h>
 #include <linux/printk.h>
