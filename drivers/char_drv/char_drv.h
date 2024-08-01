@@ -1,6 +1,14 @@
 #if !defined(CHAR_DEV_H)
 #define CHAR_DEV_H
 
+#include <linux/module.h>
+#include <linux/init.h>
+#include <linux/string.h>
+#include <linux/printk.h>
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/uaccess.h>
+
 #define LICENSE_V "GPL"
 #define DRV_NAME "char_drv"
 #define DRV_MODULE_VERSION "1.0"

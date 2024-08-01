@@ -1,6 +1,5 @@
-#if !defined(GPIO_DEV_H)
-#define GPIO_DEV_H
-
+#if !defined(GPIO_INTERRUPT_DEV_H)
+#define GPIO_INTERRUPT_DEV_H
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/string.h>
@@ -10,9 +9,10 @@
 #include <linux/uaccess.h>
 #include <linux/gpio.h>
 #include <linux/delay.h>
+#include <linux/interrupt.h>
 
 #define LICENSE_V "GPL"
-#define DRV_NAME "gpio_drv"
+#define DRV_NAME "gpio_interrupt_drv"
 #define DRV_MODULE_VERSION "1.0"
 #define DRV_MODULE_AUTHOR "Shanaka"
 #define DRV_MODULE_DESCRIPTION "GPIO test driver"
@@ -26,10 +26,20 @@ static struct class *device_class;
 static struct cdev device_cdev;
 
 /* GPIO char buffer */
-static char gpio_buffer[8];
+static char gpio_buffer[1];
 // GPIO numbers
-unsigned int gpios[] = {111,111,112,113,114,115,116,117};
-char *gpio_names[] = {"GPIO_110", "GPIO_111", "GPIO_112", "GPIO_113", "GPIO_114", "GPIO_115", "GPIO_116", "GPIO_117"};
+unsigned int gpios[] = {111};
+char *gpio_names[] = {"GPIO_110"};
+// interrupt number
+unsigned int irq_no;
+
+/**
+ * @brief Handle interrupt routine
+ * @param int irq_no interrupt identifier
+ * @param void* device indentifier
+ * @param irqreturn_t interrupt process return
+ */
+static irqreturn_t interrupt_handler(int irq_no, void *dev_id);
 
 /**
  * @brief Return kernel data back to user buffer

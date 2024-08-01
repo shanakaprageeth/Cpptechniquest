@@ -1,4 +1,4 @@
-#include "char_drv.h"
+#include "gpio_interrupt_drv.h"
 
 MODULE_LICENSE(LICENSE_V);
 MODULE_AUTHOR(DRV_MODULE_AUTHOR);
@@ -7,8 +7,10 @@ MODULE_VERSION(DRV_MODULE_VERSION);
 
 static ssize_t return_data_to_user(struct file *File, char *user_buffer, size_t count, loff_t *offset){
 	int to_copy, not_copied, delta;
-	to_copy = min(count, buffer_pointer);
-	not_copied = copy_to_user(user_buffer, buffer, to_copy);
+	to_copy = min(count, sizeof(gpio_buffer));
+	for(int i=0; i<to_copy; i++)
+		gpio_buffer[i] = gpio_get_value(gpios[i]);
+	not_copied = copy_to_user(user_buffer, gpio_buffer, to_copy);
 	delta = to_copy - not_copied;
 	printk(KERN_DEBUG "Copy data to user buffer \n");
 	return delta;
@@ -16,10 +18,11 @@ static ssize_t return_data_to_user(struct file *File, char *user_buffer, size_t 
 
 static ssize_t process_user_data(struct file *File, const char *user_buffer, size_t count, loff_t *offset){
 	int to_copy, not_copied, delta;
-	to_copy = min(count, sizeof(buffer));
-	not_copied = copy_from_user(buffer, user_buffer, to_copy);
-	buffer_pointer = to_copy;
+	to_copy = min(count, sizeof(gpio_buffer));
+	not_copied = copy_from_user(gpio_buffer, user_buffer, to_copy);
 	delta = to_copy - not_copied;
+	for(int i=0; i<to_copy; i++)
+		gpio_set_value(gpios[i], ((gpio_buffer[i]) & (1<<i)) >> i);
 	printk(KERN_DEBUG "Processed user data \n");
 	return delta;
 }
@@ -64,20 +67,37 @@ static int __init ModuleInit(void){
 		device_destroy(device_class, device_no);
 		return -1;
 	}
-    /* 
-	// Following commented section is to setup a dummy device with static device number
-	int retval = register_chrdev(99, "device_number",&file_ops );
-	if(retval < 0)
-		printk(KERN_NOTICE "failed to register the device \n");
-	else
-		printk(KERN_NOTICE "successufully registered device %d %d\n", retval>>20, retval&0xfffff);
-	*/
+    for(int i=0; i<sizeof(gpio_buffer); i++) {
+		if(gpio_request(gpios[i], gpio_names[i])) {
+			printk(KERN_ALERT "Error Init GPIO %d\n", gpios[i]);
+			for(;i>=0; i--){
+				gpio_free(gpios[i]);
+			}
+			class_destroy(device_class);
+			unregister_chrdev_region(device_no, 1);
+			device_destroy(device_class, device_no);
+			return -1;
+		}
+	}
+	for(int i=0; i<sizeof(gpio_buffer); i++) {
+		if(gpio_direction_output(gpios[i], 0)) {
+			printk(KERN_ALERT "Error setting GPIO %d to output\n", i);
+			for(;i>=0; i--){
+				gpio_free(gpios[i]);
+			}
+			class_destroy(device_class);
+			unregister_chrdev_region(device_no, 1);
+			device_destroy(device_class, device_no);
+			return -1;
+		}
+	}
 	return retval;
-
 }
 
 static void __exit ModuleExit(void){
 	printk("%s()\n", __func__);
+	for(int i=0; i<sizeof(gpio_buffer); i++)
+		gpio_free(gpios[i]);
 	cdev_del(&device_cdev);
 	class_destroy(device_class);
 	unregister_chrdev_region(device_no, 1);
